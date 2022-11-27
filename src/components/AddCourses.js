@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -28,6 +29,17 @@ const MenuProps = {
     },
 };
 
+const toastStyle = {
+    position: "top-right",
+    autoClose: 1000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light"
+};
+
 function getStyles(name, prerequisiteName, theme) {
     return {
         fontWeight:
@@ -40,14 +52,17 @@ function getStyles(name, prerequisiteName, theme) {
 const theme = createTheme();
 
 const RegisterCourse = () => {
+    const [ courseCode, setCourseCode ] = useState('');
+    const [ courseName, setCourseName ] = useState('');
+    const [ description, setDescription ] = useState('');
     const [ credits, setCredits ] = useState('');
+    const [ capacity, setCapacity ] = useState('');
     const [ specialisation, setspecialisation ] = useState('');
     const [ selectedPrerequisite, setSelectedPrerequisite] = useState([]);
-    const [ selectedPrerequisiteId, setSelectedPrerequisiteId] = useState([]);
+
     const [ savedSpecialisationList, setSavedSpecialisationList] = useState([]);
     const [ savedCourseList, setSavedCourseList] = useState([]);
 
-    console.log(selectedPrerequisite);
     useEffect(()=>{
         async function getSpecialisations(){
             await axios.get("http://localhost:8080/ESD_Project-1.0-SNAPSHOT/api/course/getSpecialisations", {})
@@ -80,11 +95,36 @@ const RegisterCourse = () => {
         getSpecialisations();
         getCourses();
     }, []);
-    console.log(savedCourseList);
-    console.log(savedSpecialisationList);
+
+    //Helper Method
+    function resetFields (){
+        setCourseCode('');
+        setCourseName('');
+        setDescription('');
+        setCredits("");
+        setCapacity("");
+        setspecialisation("");
+        setSelectedPrerequisite([]);
+    }
+
+    const handleCourseCode = (event) => {
+        setCourseCode(event.target.value)
+    }
+
+    const handleCourseName = (event) => {
+        setCourseName(event.target.value)
+    }
+
+    const handleDescription = (event) => {
+        setDescription(event.target.value)
+    }
 
     const handleCredits = (event) => {
         setCredits(event.target.value);
+    }
+
+    const handleCapacity = (event) => {
+        setCapacity(event.target.value);
     }
 
     const handlespecialisation = (event) => {
@@ -102,8 +142,44 @@ const RegisterCourse = () => {
         );
     };
     const handleSubmit = async (event) => {
-
         event.preventDefault();
+
+        //Perform Validations - coursecode,name,credits,capacity
+        //COurse code validation
+        if(typeof courseCode === 'string' && courseCode.trim().length === 0){
+            toast.error("Please enter Course Code",toastStyle);
+            return;
+        }
+        //TODO Name Validaion
+        if(typeof courseName === 'string' && courseName.trim().length === 0){
+            toast.error("Please enter Course Name",toastStyle);
+            return;
+        }
+        //TODO credits validation
+        let creditsNum = parseInt(credits);
+        if(!creditsNum || creditsNum <= 0){
+            toast.error("Please enter valid credits",toastStyle);
+            return;
+        }
+        //TODO capacity validation
+        let capacityNum = parseInt(capacity);
+        console.log("lll",capacityNum);
+        if(!capacityNum || capacityNum <= 0){
+            toast.error("Please enter valid capacity",toastStyle);
+            return;
+        }
+        //Check if Code is Not Registered already
+        let isCourseCodePresent = false;
+        savedCourseList.map(course => {
+            if (course.courseCode === courseCode){
+                isCourseCodePresent  = true;
+            }
+        })
+        if(isCourseCodePresent){
+            toast.error("Course Code Already registered.",toastStyle)
+            return;
+        }
+
         let temp = [];
         savedCourseList.map(c=>delete c.prerequistes);
         for(let i=0; i<savedCourseList.length; i++){
@@ -117,21 +193,21 @@ const RegisterCourse = () => {
         const data = new FormData(event.currentTarget);
 
         console.log({
-            courseCode: data.get('courseCode'),
-            courseName: data.get('courseName'),
-            description: data.get('description'),
-            credits: data.get('credits'),
-            capacity: data.get('capacity'),
+            courseCode: courseCode,
+            courseName: courseName,
+            description: description,
+            credits: creditsNum,
+            capacity: capacity,
             specialisation: {specialisationId:specialisation},
             preRequisite: temp
         });
 
         let requestObject = {
-            courseCode: data.get('courseCode'),
-            name: data.get('courseName'),
-            description: data.get('description'),
-            credits: data.get('credits'),
-            capacity: data.get('capacity'),
+            courseCode: courseCode,
+            name: courseName,
+            description: description,
+            credits: credits,
+            capacity: capacity,
             ...specialisation && {specialisation : {specialisationId : specialisation}},
             prerequistes: temp
         };
@@ -144,9 +220,20 @@ const RegisterCourse = () => {
                     console.log(response);
                     if(response.status === 200){
                         console.log("data saved");
-                        setCredits("");
-                        setspecialisation("");
-                        setSelectedPrerequisite([]);
+
+                        //Reset fields after submit
+                        resetFields()
+
+                        toast.success('Course added successfully', {
+                            position: "top-right",
+                            autoClose: 1000,
+                            hideProgressBar: true,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                        })
                     }
                 },
                 (error) => {
@@ -156,6 +243,11 @@ const RegisterCourse = () => {
 
 
     };
+
+    const handleReset = (e) => {
+        console.log("IN RESET")
+        resetFields()
+    }
     console.log("jainam",selectedPrerequisite);
     return(
         <ThemeProvider theme={theme}>
@@ -167,15 +259,27 @@ const RegisterCourse = () => {
                         Register Course
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                        <TextField margin="normal" required fullWidth id="courseCode" label="Course Code" name="courseCode" autoComplete="courseCode" autoFocus/>
+                        <TextField margin="normal"
+                                   required fullWidth id="courseCode" label="Course Code"
+                                   name="courseCode" autoComplete="courseCode" autoFocus
+                                   onChange={handleCourseCode}
+                                   value = {courseCode} />
 
-                        <TextField margin="normal" required fullWidth id="courseName" label="Course Name" name="courseName" autoComplete="courseName" autoFocus/>
+                        <TextField margin="normal" required fullWidth id="courseName"
+                                   label="Course Name" name="courseName" autoComplete="courseName" autoFocus
+                                   onChange={handleCourseName} value={courseName} />
 
-                        <TextField margin="normal" fullWidth id="description" label="Description" name="description" multiline rows={4} autoComplete="description" autoFocus/>
+                        <TextField margin="normal" fullWidth id="description" label="Description"
+                                   name="description" multiline rows={4} autoComplete="description" autoFocus
+                                   onChange={handleDescription} value={description}/>
 
-                        <TextField margin="normal" required fullWidth id="credits" label="Credits" name="credits" autoComplete="credits" autoFocus onChange={handleCredits} value={credits}/>
+                        <TextField margin="normal" required fullWidth id="credits" label="Credits"
+                                   name="credits" autoComplete="credits" autoFocus
+                                   onChange={handleCredits} value={credits}/>
 
-                        <TextField margin="normal" required fullWidth id="capacity" label="Capacity" name="capacity" autoComplete="capacity" autoFocus/>
+                        <TextField margin="normal" required fullWidth id="capacity" label="Capacity"
+                                   name="capacity" autoComplete="capacity" autoFocus
+                                   onChange={handleCapacity} value={capacity}/>
 
                         <FormControl fullWidth margin='normal'>
                             <InputLabel id="select-specialisation">specialisation</InputLabel>
@@ -194,15 +298,15 @@ const RegisterCourse = () => {
                         <FormControl fullWidth margin='normal'>
                             <InputLabel id="prerequisite-select">Prerequisite</InputLabel>
                             <Select labelId="prerequisite-select" id="prerequisite" multiple value={ selectedPrerequisite}onChange={handlePrerequisiteChange} input={<OutlinedInput id="prerequisite-multiple-chip" label="Chip" />}
-                                renderValue={(selected) => (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {
-                                            selected.map
-                                            ((value) => (
-                                                <Chip key={value} label={value} />
-                                            ))}
-                                    </Box>
-                                )} MenuProps={MenuProps}
+                                    renderValue={(selected) => (
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                            {
+                                                selected.map
+                                                ((value) => (
+                                                    <Chip key={value} label={value} />
+                                                ))}
+                                        </Box>
+                                    )} MenuProps={MenuProps}
                             >
                                 {
                                     savedCourseList.map
@@ -226,7 +330,17 @@ const RegisterCourse = () => {
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
                         >
-                            Register
+                            Add Course
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                            onClick={handleReset}
+                        >
+                            Clear
                         </Button>
 
                     </Box>

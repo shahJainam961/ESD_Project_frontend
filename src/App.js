@@ -26,6 +26,7 @@ function App() {
     const [user, setUser] = useState(null)
     return (
          <>
+             <ToastContainer/>
              <Header />
              <Routes>
                  <Route path="/" element={<Login />}/>
