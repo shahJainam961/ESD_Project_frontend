@@ -1,11 +1,12 @@
 import './App.css';
 import {Button, Col, Container, Row} from "reactstrap";
 import { ToastContainer, toast } from 'react-toastify';
-import AdminLogin from "./components/AdminLogin";
+import AddCourses from "./components/AddCourses";
 import Header from "./components/Header";
 import Login from "./components/Login";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {useState} from "react";
+import ProtectedRoutes from "./components/utils/ProtectedRoutes";
 
 function App() {
 
@@ -28,7 +29,10 @@ function App() {
              <Header />
              <Routes>
                  <Route path="/" element={<Login />}/>
-                 <Route path="/addCourse" element={<AdminLogin />}/>
+                 <Route element={<ProtectedRoutes />}>
+                     <Route path="/addCourse" element={<AddCourses />}/>
+                 </Route>
+
              </Routes>
         </>
     );

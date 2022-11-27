@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from "axios";
 
 import { useNavigate } from 'react-router-dom';
+import {useEffect} from "react";
 
 
 function Copyright(props) {
@@ -36,6 +37,13 @@ const theme = createTheme();
 
 const Login = ({history}) => {
     let navigate = useNavigate();
+    const userInfo = localStorage.getItem('courseUserInfo');
+    useEffect(() => {
+        //This is force redirect
+        if(userInfo){
+            navigate('/addCourse');
+        }
+    }, [userInfo, navigate])
     const handleSubmit = async(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -53,6 +61,10 @@ const Login = ({history}) => {
                 (response) => {
                     console.log(response);
                     if(response.status === 200){
+                        localStorage.setItem('courseUserInfo', JSON.stringify({
+                            email: data.get('email'),
+                            password: data.get('password')
+                        }))
                         navigate('/addCourse');
                     }
                 },
@@ -67,14 +79,7 @@ const Login = ({history}) => {
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
-                <Box
-                    sx={{
-                        marginTop: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                    }}
-                >
+                <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
                         <LockOutlinedIcon />
                     </Avatar>
@@ -82,36 +87,10 @@ const Login = ({history}) => {
                         Sign in
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email Address"
-                            name="email"
-                            autoComplete="email"
-                            autoFocus
-                        />
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
-                        />
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
+                        <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus/>
+                        <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password"/>
+                        <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me"/>
+                        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                             Sign In
                         </Button>
                         <Grid container>
