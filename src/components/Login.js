@@ -16,22 +16,18 @@ import axios from "axios";
 
 import { useNavigate } from 'react-router-dom';
 import {useEffect} from "react";
+import { toast } from 'react-toastify';
 
-
-function Copyright(props) {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
-            <Link color="inherit" href="
-https://mui.com/
-">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
+const toastStyle = {
+    position: "top-right",
+    autoClose: 1000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light"
+};
 
 const theme = createTheme();
 
@@ -65,10 +61,12 @@ const Login = ({history}) => {
                             email: data.get('email'),
                             password: data.get('password')
                         }))
+                        toast.success("Login Successfull", toastStyle)
                         navigate('/addCourse');
                     }
                 },
                 (error) => {
+                    toast.success("Login failed", toastStyle)
                     console.log(error);
                 }
             );
@@ -79,35 +77,22 @@ const Login = ({history}) => {
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
-                <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
+                <Box sx={{ marginTop: 15, display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Admin Login
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                         <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus/>
                         <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password"/>
-                        <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me"/>
                         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                            Sign In
+                            Login In
                         </Button>
-                        <Grid container>
-                            <Grid item xs>
-                                <Link href="#" variant="body2">
-                                    Forgot password?
-                                </Link>
-                            </Grid>
-                            <Grid item>
-                                <Link href="#" variant="body2">
-                                    {"Don't have an account? Sign Up"}
-                                </Link>
-                            </Grid>
-                        </Grid>
                     </Box>
                 </Box>
-                <Copyright sx={{ mt: 8, mb: 4 }} />
+
             </Container>
         </ThemeProvider>
     )

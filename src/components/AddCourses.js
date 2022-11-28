@@ -1,8 +1,9 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -30,7 +31,7 @@ const MenuProps = {
 };
 
 const toastStyle = {
-    position: "top-right",
+    position: "bottom-right",
     autoClose: 1000,
     hideProgressBar: true,
     closeOnClick: true,
@@ -57,44 +58,44 @@ const RegisterCourse = () => {
     const [ description, setDescription ] = useState('');
     const [ credits, setCredits ] = useState('');
     const [ capacity, setCapacity ] = useState('');
-    const [ specialisation, setspecialisation ] = useState('');
+    const [ specialisation, setSpecialisation ] = useState('');
     const [ selectedPrerequisite, setSelectedPrerequisite] = useState([]);
-
     const [ savedSpecialisationList, setSavedSpecialisationList] = useState([]);
     const [ savedCourseList, setSavedCourseList] = useState([]);
 
     useEffect(()=>{
-        async function getSpecialisations(){
-            await axios.get("http://localhost:8080/ESD_Project-1.0-SNAPSHOT/api/course/getSpecialisations", {})
-                .then(
-                    (response) => {
-                        console.log(response);
-                        if(response.status === 200){
-                            setSavedSpecialisationList(response.data);
-                        }
-                    },
-                    (error) => {
-                        console.log(error);
-                    }
-                );
-        }
-        async function getCourses(){
-            await axios.get("http://localhost:8080/ESD_Project-1.0-SNAPSHOT/api/course/getCourses", {})
-                .then(
-                    (response) => {
-                        console.log(response);
-                        if(response.status === 200){
-                            setSavedCourseList(response.data);
-                        }
-                    },
-                    (error) => {
-                        console.log(error);
-                    }
-                );
-        }
         getSpecialisations();
         getCourses();
     }, []);
+
+    async function getSpecialisations(){
+        await axios.get("http://localhost:8080/ESD_Project-1.0-SNAPSHOT/api/course/getSpecialisations", {})
+            .then(
+                (response) => {
+                    console.log(response);
+                    if(response.status === 200){
+                        setSavedSpecialisationList(response.data);
+                    }
+                },
+                (error) => {
+                    console.log(error);
+                }
+            );
+    }
+    async function getCourses(){
+        await axios.get("http://localhost:8080/ESD_Project-1.0-SNAPSHOT/api/course/getCourses", {})
+            .then(
+                (response) => {
+                    console.log(response);
+                    if(response.status === 200){
+                        setSavedCourseList(response.data);
+                    }
+                },
+                (error) => {
+                    console.log(error);
+                }
+            );
+    }
 
     //Helper Method
     function resetFields (){
@@ -103,7 +104,7 @@ const RegisterCourse = () => {
         setDescription('');
         setCredits("");
         setCapacity("");
-        setspecialisation("");
+        setSpecialisation("");
         setSelectedPrerequisite([]);
     }
 
@@ -127,8 +128,8 @@ const RegisterCourse = () => {
         setCapacity(event.target.value);
     }
 
-    const handlespecialisation = (event) => {
-        setspecialisation(event.target.value);
+    const handleSpecialisation = (event) => {
+        setSpecialisation(event.target.value);
     }
 
     const handlePrerequisiteChange = (event) => {
@@ -179,7 +180,6 @@ const RegisterCourse = () => {
             toast.error("Course Code Already registered.",toastStyle)
             return;
         }
-
         let temp = [];
         savedCourseList.map(c=>delete c.prerequistes);
         for(let i=0; i<savedCourseList.length; i++){
@@ -190,14 +190,15 @@ const RegisterCourse = () => {
             }
         }
 
-        const data = new FormData(event.currentTarget);
+        // const data = new FormData(event.currentTarget);
+        console.log("jainamshahaaaaa");
 
         console.log({
             courseCode: courseCode,
             courseName: courseName,
             description: description,
             credits: creditsNum,
-            capacity: capacity,
+            capacity: capacityNum,
             specialisation: {specialisationId:specialisation},
             preRequisite: temp
         });
@@ -211,6 +212,7 @@ const RegisterCourse = () => {
             ...specialisation && {specialisation : {specialisationId : specialisation}},
             prerequistes: temp
         };
+
 
 
 
@@ -234,6 +236,8 @@ const RegisterCourse = () => {
                             progress: undefined,
                             theme: "light",
                         })
+                        getSpecialisations();
+                        getCourses();
                     }
                 },
                 (error) => {
@@ -251,97 +255,122 @@ const RegisterCourse = () => {
     console.log("jainam",selectedPrerequisite);
     return(
         <ThemeProvider theme={theme}>
-            <Container component="main" maxWidth="xs">
+            <Container component="main" >
                 <CssBaseline />
-                <Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center',}}>
+                <Box sx={{marginTop: 12, display: 'flex', flexDirection: 'column', textAlign: "center"}}>
 
-                    <Typography component="h1" variant="h5">
+                    <Typography component="h1" variant="h5" style = {{fontFamily: "Open Sans, sans-serif",
+                        fontWeight: 700,
+                        size: "18px",
+                        marginLeft: "38px",
+                        color: "black"}}>
                         Register Course
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                        <TextField margin="normal"
-                                   required fullWidth id="courseCode" label="Course Code"
-                                   name="courseCode" autoComplete="courseCode" autoFocus
-                                   onChange={handleCourseCode}
-                                   value = {courseCode} />
+                    <Box component="form" noValidate sx={{ mt: 1 }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <TextField margin="normal"
+                                           required fullWidth id="courseCode" label="Course Code"
+                                           name="courseCode" autoComplete="courseCode" autoFocus
+                                           onChange={handleCourseCode}
+                                           value = {courseCode} />
+                            </Grid>
 
-                        <TextField margin="normal" required fullWidth id="courseName"
-                                   label="Course Name" name="courseName" autoComplete="courseName" autoFocus
-                                   onChange={handleCourseName} value={courseName} />
+                            <Grid item xs={6}>
+                                <TextField margin="normal" required fullWidth id="courseName"
+                                           label="Course Name" name="courseName" autoComplete="courseName" autoFocus
+                                           onChange={handleCourseName} value={courseName} />
+                            </Grid>
 
-                        <TextField margin="normal" fullWidth id="description" label="Description"
-                                   name="description" multiline rows={4} autoComplete="description" autoFocus
-                                   onChange={handleDescription} value={description}/>
+                            <Grid item xs={6}>
+                                <TextField margin="normal" fullWidth id="description" label="Description"
+                                           name="description" multiline rows={4} autoComplete="description" autoFocus
+                                           onChange={handleDescription} value={description}/>
+                            </Grid>
 
-                        <TextField margin="normal" required fullWidth id="credits" label="Credits"
-                                   name="credits" autoComplete="credits" autoFocus
-                                   onChange={handleCredits} value={credits}/>
+                            <Grid item xs={6}>
+                                <TextField margin="normal" required fullWidth id="credits" label="Credits"
+                                           name="credits" autoComplete="credits" autoFocus
+                                           onChange={handleCredits} value={credits}/>
+                            </Grid>
 
-                        <TextField margin="normal" required fullWidth id="capacity" label="Capacity"
-                                   name="capacity" autoComplete="capacity" autoFocus
-                                   onChange={handleCapacity} value={capacity}/>
+                            <Grid item xs={6}>
+                                <TextField margin="normal" required fullWidth id="capacity" label="Capacity"
+                                           name="capacity" autoComplete="capacity" autoFocus
+                                           onChange={handleCapacity} value={capacity}/>
+                            </Grid>
 
-                        <FormControl fullWidth margin='normal'>
-                            <InputLabel id="select-specialisation">specialisation</InputLabel>
-                            <Select fullWidth labelId="select-specialisation" id="specialisation" value={specialisation} label="specialisation" onChange={handlespecialisation}>
-                                {
-                                    savedSpecialisationList.map(specialisation => {
-                                        return (
-                                            <MenuItem value={specialisation.specialisationId}>{specialisation.name}</MenuItem>
-                                        );
-                                    })
-                                }
+                            <Grid item xs={6}>
+                                <FormControl fullWidth margin='normal'>
+                                    <InputLabel id="select-specialisation">specialisation</InputLabel>
+                                    <Select fullWidth labelId="select-specialisation" id="specialisation" value={specialisation} label="specialisation" onChange={handleSpecialisation}>
+                                        {
+                                            savedSpecialisationList.map(specialisation => {
+                                                return (
+                                                    <MenuItem value={specialisation.specialisationId}>{specialisation.name}</MenuItem>
+                                                );
+                                            })
+                                        }
 
-                            </Select>
-                        </FormControl>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
 
-                        <FormControl fullWidth margin='normal'>
-                            <InputLabel id="prerequisite-select">Prerequisite</InputLabel>
-                            <Select labelId="prerequisite-select" id="prerequisite" multiple value={ selectedPrerequisite}onChange={handlePrerequisiteChange} input={<OutlinedInput id="prerequisite-multiple-chip" label="Chip" />}
-                                    renderValue={(selected) => (
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                            {
-                                                selected.map
-                                                ((value) => (
-                                                    <Chip key={value} label={value} />
-                                                ))}
-                                        </Box>
-                                    )} MenuProps={MenuProps}
-                            >
-                                {
-                                    savedCourseList.map
-                                    ((course) => (
-                                        <MenuItem
-                                            key={course.courseId}
-                                            value={course.courseId}
-                                            style={getStyles(course,  selectedPrerequisite, theme)}
-                                        >
-                                            {course.name}
-                                        </MenuItem>
-                                    ))}
-                            </Select>
-                        </FormControl>
+                            <Grid item xs={6}>
+                                <FormControl fullWidth margin='normal'>
+                                    <InputLabel id="prerequisite-select">Prerequisite</InputLabel>
+                                    <Select labelId="prerequisite-select" id="prerequisite" multiple value={ selectedPrerequisite}onChange={handlePrerequisiteChange} input={<OutlinedInput id="prerequisite-multiple-chip" label="Chip" />}
+                                            renderValue={(selected) => (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    {
+                                                        selected.map
+                                                        ((value) => (
+                                                            <Chip key={value} label={value} />
+                                                        ))}
+                                                </Box>
+                                            )} MenuProps={MenuProps}
+                                    >
+                                        {
+                                            savedCourseList.map
+                                            ((course) => (
+                                                <MenuItem
+                                                    key={course.courseId}
+                                                    value={course.courseId}
+                                                    style={getStyles(course,  selectedPrerequisite, theme)}
+                                                >
+                                                    {course.name}
+                                                </MenuItem>
+                                            ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
 
-
-
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Add Course
-                        </Button>
-
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                            onClick={handleReset}
-                        >
-                            Clear
-                        </Button>
+                        <Grid container spacing={2} xs={12} style={{textAlign: "center"}} >
+                            <Grid item xs={3}>
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="success"
+                                    sx={{ mt: 3, mb: 2 }}
+                                    onClick={handleSubmit}
+                                >
+                                    Add Course
+                                </Button>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    sx={{ mt: 3, mb: 2 }}
+                                    onClick={handleReset}
+                                >
+                                    Clear
+                                </Button>
+                            </Grid>
+                        </Grid>
 
                     </Box>
                 </Box>
