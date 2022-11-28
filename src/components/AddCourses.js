@@ -52,7 +52,7 @@ function getStyles(name, prerequisiteName, theme) {
 
 const theme = createTheme();
 
-const RegisterCourse = () => {
+const AddCourse = () => {
     const [ courseCode, setCourseCode ] = useState('');
     const [ courseName, setCourseName ] = useState('');
     const [ description, setDescription ] = useState('');
@@ -62,11 +62,6 @@ const RegisterCourse = () => {
     const [ selectedPrerequisite, setSelectedPrerequisite] = useState([]);
     const [ savedSpecialisationList, setSavedSpecialisationList] = useState([]);
     const [ savedCourseList, setSavedCourseList] = useState([]);
-
-    useEffect(()=>{
-        getSpecialisations();
-        getCourses();
-    }, []);
 
     async function getSpecialisations(){
         await axios.get("http://localhost:8080/ESD_Project-1.0-SNAPSHOT/api/course/getSpecialisations", {})
@@ -96,6 +91,12 @@ const RegisterCourse = () => {
                 }
             );
     }
+
+    useEffect(()=>{
+        getSpecialisations();
+        getCourses();
+    }, []);
+
 
     //Helper Method
     function resetFields (){
@@ -133,14 +134,9 @@ const RegisterCourse = () => {
     }
 
     const handlePrerequisiteChange = (event) => {
-        console.log(event.target.value,"hii");
-        const {
-            target: { value },
-        } = event;
-        setSelectedPrerequisite(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        console.log(event);
+        let value= event.target.value;
+        setSelectedPrerequisite(value);
     };
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -164,7 +160,6 @@ const RegisterCourse = () => {
         }
         //TODO capacity validation
         let capacityNum = parseInt(capacity);
-        console.log("lll",capacityNum);
         if(!capacityNum || capacityNum <= 0){
             toast.error("Please enter valid capacity",toastStyle);
             return;
@@ -190,8 +185,6 @@ const RegisterCourse = () => {
             }
         }
 
-        // const data = new FormData(event.currentTarget);
-        console.log("jainamshahaaaaa");
 
         console.log({
             courseCode: courseCode,
@@ -252,7 +245,6 @@ const RegisterCourse = () => {
         console.log("IN RESET")
         resetFields()
     }
-    console.log("jainam",selectedPrerequisite);
     return(
         <ThemeProvider theme={theme}>
             <Container component="main" >
@@ -311,7 +303,6 @@ const RegisterCourse = () => {
                                                 );
                                             })
                                         }
-
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -322,11 +313,12 @@ const RegisterCourse = () => {
                                     <Select labelId="prerequisite-select" id="prerequisite" multiple value={ selectedPrerequisite}onChange={handlePrerequisiteChange} input={<OutlinedInput id="prerequisite-multiple-chip" label="Chip" />}
                                             renderValue={(selected) => (
                                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                    {
+                                                        {
                                                         selected.map
-                                                        ((value) => (
-                                                            <Chip key={value} label={value} />
-                                                        ))}
+                                                        ((value) => {
+                                                            let va = savedCourseList.filter((course)=>course.courseId===value)[0].name;
+                                                            return (<Chip key={value} label={va} />);
+                                                        })}
                                                 </Box>
                                             )} MenuProps={MenuProps}
                                     >
@@ -379,4 +371,4 @@ const RegisterCourse = () => {
     )
 }
 
-export default RegisterCourse;
+export default AddCourse;
